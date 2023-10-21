@@ -3,57 +3,41 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 import csv
-class cono_azul:
+
+class cono:
     def __init__(self, x: float, y: float):
         self.__x = x
         self.__y = y
+        
+    @property
+    def x(self):
+        return self.__x
+
+    @property
+    def y(self):
+        return self.__y
+
+    @x.setter
+    def x(self, value):
+        self.__x = value
+
+    @y.setter
+    def y(self, value):
+        self.__y = value
+
+class cono_azul(cono):
 
     def __str__(self):
         return "Cono azul en la posición: ({}, {})".format(self.__x, self.__y)
 
-    @property
-    def x(self):
-        return self.__x
-
-    @property
-    def y(self):
-        return self.__y
-
-    @x.setter
-    def x(self, value):
-        self.__x = value
-
-    @y.setter
-    def y(self, value):
-        self.__y = value
-
-class cono_amarillo:
-    def __init__(self, x: float, y: float):
-        self.__x = x
-        self.__y = y
+class cono_amarillo(cono):
 
     def __str__(self):
         return "Cono amarillo en la posición: ({}, {})".format(self.__x, self.__y)
 
-    @property
-    def x(self):
-        return self.__x
-
-    @property
-    def y(self):
-        return self.__y
-
-    @x.setter
-    def x(self, value):
-        self.__x = value
-
-    @y.setter
-    def y(self, value):
-        self.__y = value
-
 # Rutas a los archivos
 ruta_mapa_nurbur2D = 'utils/nurburgring_map_2D.jpg'
-ruta_csv_nurbur = 'nurbur_data.csv'
+ruta_csv_nurbur = 'data/nurbur_data.csv'
 
 background_image = mpimg.imread(ruta_mapa_nurbur2D)
 
@@ -146,6 +130,6 @@ plt.grid(True)
 for i in range(1, len(trazada_intermedia)):
     x, y = trazada_intermedia[i]
     punto_rojo.set_offsets([x, y])
-    plt.pause(0.1)  # Añadir un retraso de 0.1 segundos entre actualizaciones
+    plt.pause(0.01)  # Añadir un retraso de 0.1 segundos entre actualizaciones
 
 plt.show()
