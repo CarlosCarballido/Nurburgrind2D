@@ -3,7 +3,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 import csv
-
 class cono_azul:
     def __init__(self, x: float, y: float):
         self.__x = x
@@ -94,73 +93,59 @@ for i in range(len(limite_izquierdo[0])):
 # Convierte la lista de puntos medios en un array numpy
 trazada_intermedia = np.array(puntos_medios)
 
-# Definir parámetros del coche y controlador PID
-max_steering_angle = 30  # Máximo ángulo de dirección en grados
-car_speed = 33.0  # Velocidad constante del coche
-Kp = 0.5  # Coeficiente proporcional del controlador
-Ki = 0.0  # Coeficiente integral del controlador
-Kd = 0.0  # Coeficiente derivativo del controlador
+# Número de puntos intermedios a agregar entre cada par de puntos
+num_puntos_intermedios = 60  # Puedes ajustar este valor según tus necesidades
 
-# Inicializar el estado del coche
-car_x = trazada_intermedia[0, 0]
-car_y = trazada_intermedia[0, 1]
-car_orientation = 0
-car_steering_angle = 0
+# Inicializa un nuevo array para almacenar los puntos con interpolación
+nueva_trazada_intermedia = []
 
-# Parámetros de simulación
-num_iterations = 500
-dt = 0.1
-
-# Bucle de simulación
-for _ in range(num_iterations):
-    # Calcular el error entre la posición actual del coche y el punto deseado en la trazada intermedia
-    error = np.sqrt((car_x - trazada_intermedia[:, 0])**2 + (car_y - trazada_intermedia[:, 1])**2)
-    closest_point_idx = np.argmin(error)
-    desired_x, desired_y = trazada_intermedia[closest_point_idx]
-
-    # Calcular la entrada de control de dirección (controlador proporcional)
-    error_orientation = np.arctan2(desired_y - car_y, desired_x - car_x) - car_orientation
-    car_steering_angle = np.clip(Kp * error_orientation, -max_steering_angle, max_steering_angle)
-
-    # Actualizar el estado del coche (modelo cinemático simple)
-    car_orientation += car_steering_angle * dt
-    car_x += car_speed * np.cos(car_orientation) * dt
-    car_y += car_speed * np.sin(car_orientation) * dt
-
-    # Actualizar la posición del coche en el mapa
-    plt.clf()
-    plt.imshow(background_image)
-    plt.scatter(car_x, car_y, c='red', s=20)
-    for i in range(len(limite_derecho[0])):
-        plt.scatter(limite_derecho[0][i], limite_derecho[1][i], c="yellow")
-    for i in range(len(limite_izquierdo[0])):
-        plt.scatter(limite_izquierdo[0][i], limite_izquierdo[1][i], c="blue")
-    plt.plot(trazada_intermedia[:, 0], trazada_intermedia[:, 1], 'g-', label='Trazada intermedia')
-    plt.title('Coche Siguiendo el Camino en el Circuito de Nürburgring')
-    plt.xlabel('Coordenada X')
-    plt.ylabel('Coordenada Y')
-    plt.legend()
-    plt.grid(True)
-    plt.pause(0.01)
+# Recorre la trazada original para agregar puntos intermedios
+for i in range(len(trazada_intermedia) - 1):
+    x1, y1 = trazada_intermedia[i]
+    x2, y2 = trazada_intermedia[i + 1]
     
-plt.show()
+    # Calcula la distancia entre los dos puntos
+    distancia_entre_puntos = np.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
+    
+    # Interpola los puntos intermedios solo si la distancia es mayor que un umbral
+    if distancia_entre_puntos > 0.01:  # Puedes ajustar este umbral según tus necesidades
+        interp_x = np.linspace(x1, x2, num_puntos_intermedios + 2)[1:-1]
+        interp_y = np.linspace(y1, y2, num_puntos_intermedios + 2)[1:-1]
+        nueva_trazada_intermedia.extend(list(zip(interp_x, interp_y)))
+    else:
+        nueva_trazada_intermedia.append([x1, y1])
 
-#plt.figure(figsize=(10, 6))
-#plt.imshow(background_image)
-#
-#for i in range(len(limite_derecho[0])):
-#    plt.scatter(limite_derecho[0][i], limite_derecho[1][i], c="yellow")
-#
-#for i in range(len(limite_izquierdo[0])):
-#    plt.scatter(limite_izquierdo[0][i], limite_izquierdo[1][i], c="blue")
-#    
-#plt.plot(trazada_intermedia[:, 0], trazada_intermedia[:, 1], 'g-', label='Trazada intermedia')
-#
-#plt.title('Representación en 2D del Circuito de Nürburgring')
-#plt.xlabel('Coordenada X')
-#plt.ylabel('Coordenada Y')
-#plt.legend()
-#
-#plt.grid(True)
-#plt.show()
-#
+# Agrega el último punto de la trazada original
+nueva_trazada_intermedia.append(trazada_intermedia[-1])
+
+# Convierte la lista de puntos en un array numpy
+trazada_intermedia = np.array(nueva_trazada_intermedia)
+
+plt.figure(figsize=(10, 6))
+plt.imshow(background_image)
+
+for i in range(len(limite_derecho[0])):
+    plt.scatter(limite_derecho[0][i], limite_derecho[1][i], c="yellow")
+
+for i in range(len(limite_izquierdo[0])):
+    plt.scatter(limite_izquierdo[0][i], limite_izquierdo[1][i], c="blue")
+    
+# Inicializar el punto rojo en la primera posición
+punto_rojo = plt.scatter(trazada_intermedia[0, 0], trazada_intermedia[0, 1], c="red")
+    
+plt.plot(trazada_intermedia[:, 0], trazada_intermedia[:, 1], 'g-', label='Trazada intermedia')
+
+plt.title('Representación en 2D del Circuito de Nürburgring')
+plt.xlabel('Coordenada X')
+plt.ylabel('Coordenada Y')
+plt.legend()
+
+plt.grid(True)
+
+# Actualizar la posición del punto rojo en un bucle
+for i in range(1, len(trazada_intermedia)):
+    x, y = trazada_intermedia[i]
+    punto_rojo.set_offsets([x, y])
+    plt.pause(0.1)  # Añadir un retraso de 0.1 segundos entre actualizaciones
+
+plt.show()
