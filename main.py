@@ -1,3 +1,4 @@
+
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
@@ -70,7 +71,6 @@ with open(ruta_csv_nurbur, 'r') as csvfile:
 
 
 l = np.array([[1,2,3,4], [5,6,7,8]])
-print(l[0][0])
 limite_izquierdo = np.array([[cono.x for cono in conos_azules], [cono.y for cono in conos_azules]])
 limite_derecho = np.array([[cono.x for cono in conos_amarillos], [cono.y for cono in conos_amarillos]])
 
@@ -94,21 +94,73 @@ for i in range(len(limite_izquierdo[0])):
 # Convierte la lista de puntos medios en un array numpy
 trazada_intermedia = np.array(puntos_medios)
 
-plt.figure(figsize=(10, 6))
-plt.imshow(background_image)
+# Definir parámetros del coche y controlador PID
+max_steering_angle = 30  # Máximo ángulo de dirección en grados
+car_speed = 33.0  # Velocidad constante del coche
+Kp = 0.5  # Coeficiente proporcional del controlador
+Ki = 0.0  # Coeficiente integral del controlador
+Kd = 0.0  # Coeficiente derivativo del controlador
 
-for i in range(len(limite_derecho[0])):
-    plt.scatter(limite_derecho[0][i], limite_derecho[1][i], c="yellow")
+# Inicializar el estado del coche
+car_x = trazada_intermedia[0, 0]
+car_y = trazada_intermedia[0, 1]
+car_orientation = 0
+car_steering_angle = 0
 
-for i in range(len(limite_izquierdo[0])):
-    plt.scatter(limite_izquierdo[0][i], limite_izquierdo[1][i], c="blue")
+# Parámetros de simulación
+num_iterations = 500
+dt = 0.1
+
+# Bucle de simulación
+for _ in range(num_iterations):
+    # Calcular el error entre la posición actual del coche y el punto deseado en la trazada intermedia
+    error = np.sqrt((car_x - trazada_intermedia[:, 0])**2 + (car_y - trazada_intermedia[:, 1])**2)
+    closest_point_idx = np.argmin(error)
+    desired_x, desired_y = trazada_intermedia[closest_point_idx]
+
+    # Calcular la entrada de control de dirección (controlador proporcional)
+    error_orientation = np.arctan2(desired_y - car_y, desired_x - car_x) - car_orientation
+    car_steering_angle = np.clip(Kp * error_orientation, -max_steering_angle, max_steering_angle)
+
+    # Actualizar el estado del coche (modelo cinemático simple)
+    car_orientation += car_steering_angle * dt
+    car_x += car_speed * np.cos(car_orientation) * dt
+    car_y += car_speed * np.sin(car_orientation) * dt
+
+    # Actualizar la posición del coche en el mapa
+    plt.clf()
+    plt.imshow(background_image)
+    plt.scatter(car_x, car_y, c='red', s=20)
+    for i in range(len(limite_derecho[0])):
+        plt.scatter(limite_derecho[0][i], limite_derecho[1][i], c="yellow")
+    for i in range(len(limite_izquierdo[0])):
+        plt.scatter(limite_izquierdo[0][i], limite_izquierdo[1][i], c="blue")
+    plt.plot(trazada_intermedia[:, 0], trazada_intermedia[:, 1], 'g-', label='Trazada intermedia')
+    plt.title('Coche Siguiendo el Camino en el Circuito de Nürburgring')
+    plt.xlabel('Coordenada X')
+    plt.ylabel('Coordenada Y')
+    plt.legend()
+    plt.grid(True)
+    plt.pause(0.01)
     
-plt.plot(trazada_intermedia[:, 0], trazada_intermedia[:, 1], 'g-', label='Trazada intermedia')
-
-plt.title('Representación en 2D del Circuito de Nürburgring')
-plt.xlabel('Coordenada X')
-plt.ylabel('Coordenada Y')
-plt.legend()
-
-plt.grid(True)
 plt.show()
+
+#plt.figure(figsize=(10, 6))
+#plt.imshow(background_image)
+#
+#for i in range(len(limite_derecho[0])):
+#    plt.scatter(limite_derecho[0][i], limite_derecho[1][i], c="yellow")
+#
+#for i in range(len(limite_izquierdo[0])):
+#    plt.scatter(limite_izquierdo[0][i], limite_izquierdo[1][i], c="blue")
+#    
+#plt.plot(trazada_intermedia[:, 0], trazada_intermedia[:, 1], 'g-', label='Trazada intermedia')
+#
+#plt.title('Representación en 2D del Circuito de Nürburgring')
+#plt.xlabel('Coordenada X')
+#plt.ylabel('Coordenada Y')
+#plt.legend()
+#
+#plt.grid(True)
+#plt.show()
+#
