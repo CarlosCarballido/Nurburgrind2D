@@ -5,7 +5,7 @@ import matplotlib.image as mpimg
 import csv
 from cone.cone import cono_azul, cono_amarillo
 
-# Rutas a los archivos
+# Rutas a los archivos que se utilizan
 ruta_mapa_nurbur2D = 'utils/nurburgring_map_2D.jpg'
 ruta_csv_nurbur = 'data/nurbur_data.csv'
 
@@ -25,28 +25,25 @@ with open(ruta_csv_nurbur, 'r') as csvfile:
 limite_izquierdo = np.array([[cono.x for cono in conos_azules], [cono.y for cono in conos_azules]])
 limite_derecho = np.array([[cono.x for cono in conos_amarillos], [cono.y for cono in conos_amarillos]])
 
-# Inicializa una lista para almacenar los puntos medios
 puntos_medios = []
 
-# Recorre los conos izquierdos y derechos para calcular los puntos medios
+# Recorre los conos izquierdos y derechos para calcular los puntos medios y agrega el punto medio a la lista de puntos medios
 for i in range(len(limite_izquierdo[0])):
     x_izquierdo = limite_izquierdo[0][i]
     y_izquierdo = limite_izquierdo[1][i]
     x_derecho = limite_derecho[0][i]
     y_derecho = limite_derecho[1][i]
     
-    # Calcula el punto medio
     punto_medio_x = (x_izquierdo + x_derecho) / 2
     punto_medio_y = (y_izquierdo + y_derecho) / 2
     
-    # Agrega el punto medio a la lista de puntos medios
     puntos_medios.append([punto_medio_x, punto_medio_y])
 
 # Convierte la lista de puntos medios en un array numpy
 trazada_intermedia = np.array(puntos_medios)
 
 # Número de puntos intermedios a agregar entre cada par de puntos
-num_puntos_intermedios = 60  # Puedes ajustar este valor según tus necesidades
+num_puntos_intermedios = 60
 
 # Inicializa un nuevo array para almacenar los puntos con interpolación
 nueva_trazada_intermedia = []
@@ -60,7 +57,7 @@ for i in range(len(trazada_intermedia) - 1):
     distancia_entre_puntos = np.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
     
     # Interpola los puntos intermedios solo si la distancia es mayor que un umbral
-    if distancia_entre_puntos > 0.01:  # Puedes ajustar este umbral según tus necesidades
+    if distancia_entre_puntos > 0.01: # 0.01 es un umbral arbitrario
         interp_x = np.linspace(x1, x2, num_puntos_intermedios + 2)[1:-1]
         interp_y = np.linspace(y1, y2, num_puntos_intermedios + 2)[1:-1]
         nueva_trazada_intermedia.extend(list(zip(interp_x, interp_y)))
@@ -98,6 +95,6 @@ plt.grid(True)
 for i in range(1, len(trazada_intermedia)):
     x, y = trazada_intermedia[i]
     punto_rojo.set_offsets([x, y])
-    plt.pause(0.01)  # Añadir un retraso de 0.1 segundos entre actualizaciones
+    plt.pause(0.01)  # Añadir un retraso de 0.01 segundos entre actualizaciones
 
 plt.show()
