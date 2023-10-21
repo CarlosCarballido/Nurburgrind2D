@@ -1,4 +1,4 @@
-class cono:
+class cone:
     def __init__(self, x: float, y: float):
         self.__x = x
         self.__y = y
@@ -19,12 +19,12 @@ class cono:
     def y(self, value):
         self.__y = value
 
-class cono_azul(cono):
+class blue_cone(cone):
 
     def __str__(self):
-        return "Cono azul en la posición: ({}, {})".format(self.__x, self.__y)
+        return "Blue cone at position: ({}, {})".format(self.__x, self.__y)
 
-class cono_amarillo(cono):
+class yellow_cone(cone):
 
     def __str__(self):
-        return "Cono amarillo en la posición: ({}, {})".format(self.__x, self.__y)
+        return "Yellow cone at position: ({}, {})".format(self.__x, self.__y)

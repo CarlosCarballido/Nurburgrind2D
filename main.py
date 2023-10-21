@@ -1,100 +1,99 @@
-
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 import csv
-from cone.cone import cono_azul, cono_amarillo
+from cone.cone import blue_cone, yellow_cone
 
-# Rutas a los archivos que se utilizan
-ruta_mapa_nurbur2D = 'utils/nurburgring_map_2D.jpg'
-ruta_csv_nurbur = 'data/nurbur_data.csv'
+# Paths to the files used
+map_2d_path = 'utils/nurburgring_map_2D.jpg'
+csv_nurbur_path = 'data/nurbur_data.csv'
 
-background_image = mpimg.imread(ruta_mapa_nurbur2D)
+background_image = mpimg.imread(map_2d_path)
 
-conos_azules = []
-conos_amarillos = []
+blue_cones = []
+yellow_cones = []
 
-with open(ruta_csv_nurbur, 'r') as csvfile:
-    csvreader = csv.DictReader(csvfile)
-    for row in csvreader:
-        cono_azul_obj = cono_azul(float(row['X_izq']), float(row['Y_izq']))
-        conos_azules.append(cono_azul_obj)
-        cono_amarillo_obj = cono_amarillo(float(row['X_der']), float(row['Y_der']))
-        conos_amarillos.append(cono_amarillo_obj)
+with open(csv_nurbur_path, 'r') as csvfile:
+    csv_reader = csv.DictReader(csvfile)
+    for row in csv_reader:
+        blue_cone_obj = blue_cone(float(row['X_left']), float(row['Y_left']))
+        blue_cones.append(blue_cone_obj)
+        yellow_cone_obj = yellow_cone(float(row['X_right']), float(row['Y_right']))
+        yellow_cones.append(yellow_cone_obj)
 
-limite_izquierdo = np.array([[cono.x for cono in conos_azules], [cono.y for cono in conos_azules]])
-limite_derecho = np.array([[cono.x for cono in conos_amarillos], [cono.y for cono in conos_amarillos]])
+left_boundary = np.array([[cone.x for cone in blue_cones], [cone.y for cone in blue_cones]])
+right_boundary = np.array([[cone.x for cone in yellow_cones], [cone.y for cone in yellow_cones]])
 
-puntos_medios = []
+midpoints = []
 
-# Recorre los conos izquierdos y derechos para calcular los puntos medios y agrega el punto medio a la lista de puntos medios
-for i in range(len(limite_izquierdo[0])):
-    x_izquierdo = limite_izquierdo[0][i]
-    y_izquierdo = limite_izquierdo[1][i]
-    x_derecho = limite_derecho[0][i]
-    y_derecho = limite_derecho[1][i]
+# Traverse the left and right cones to calculate midpoints and add the midpoint to the list of midpoints
+for i in range(len(left_boundary[0])):
+    x_left = left_boundary[0][i]
+    y_left = left_boundary[1][i]
+    x_right = right_boundary[0][i]
+    y_right = right_boundary[1][i]
     
-    punto_medio_x = (x_izquierdo + x_derecho) / 2
-    punto_medio_y = (y_izquierdo + y_derecho) / 2
+    midpoint_x = (x_left + x_right) / 2
+    midpoint_y = (y_left + y_right) / 2
     
-    puntos_medios.append([punto_medio_x, punto_medio_y])
+    midpoints.append([midpoint_x, midpoint_y])
 
-# Convierte la lista de puntos medios en un array numpy
-trazada_intermedia = np.array(puntos_medios)
+# Convert the list of midpoints into a numpy array
+intermediate_trace = np.array(midpoints)
 
-# Número de puntos intermedios a agregar entre cada par de puntos
-num_puntos_intermedios = 60
+# Number of intermediate points to add between each pair of points
+num_intermediate_points = 60
 
-# Inicializa un nuevo array para almacenar los puntos con interpolación
-nueva_trazada_intermedia = []
+# Initialize a new array to store points with interpolation
+new_intermediate_trace = []
 
-# Recorre la trazada original para agregar puntos intermedios
-for i in range(len(trazada_intermedia) - 1):
-    x1, y1 = trazada_intermedia[i]
-    x2, y2 = trazada_intermedia[i + 1]
+# Traverse the original trace to add intermediate points
+for i in range(len(intermediate_trace) - 1):
+    x1, y1 = intermediate_trace[i]
+    x2, y2 = intermediate_trace[i + 1]
     
-    # Calcula la distancia entre los dos puntos
-    distancia_entre_puntos = np.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
+    # Calculate the distance between the two points
+    distance_between_points = np.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
     
-    # Interpola los puntos intermedios solo si la distancia es mayor que un umbral
-    if distancia_entre_puntos > 0.01: # 0.01 es un umbral arbitrario
-        interp_x = np.linspace(x1, x2, num_puntos_intermedios + 2)[1:-1]
-        interp_y = np.linspace(y1, y2, num_puntos_intermedios + 2)[1:-1]
-        nueva_trazada_intermedia.extend(list(zip(interp_x, interp_y)))
+    # Interpolate the intermediate points only if the distance is greater than a threshold
+    if distance_between_points > 0.01:  # 0.01 is an arbitrary threshold
+        interp_x = np.linspace(x1, x2, num_intermediate_points + 2)[1:-1]
+        interp_y = np.linspace(y1, y2, num_intermediate_points + 2)[1:-1]
+        new_intermediate_trace.extend(list(zip(interp_x, interp_y)))
     else:
-        nueva_trazada_intermedia.append([x1, y1])
+        new_intermediate_trace.append([x1, y1])
 
-# Agrega el último punto de la trazada original
-nueva_trazada_intermedia.append(trazada_intermedia[-1])
+# Add the last point of the original trace
+new_intermediate_trace.append(intermediate_trace[-1])
 
-# Convierte la lista de puntos en un array numpy
-trazada_intermedia = np.array(nueva_trazada_intermedia)
+# Convert the list of points into a numpy array
+intermediate_trace = np.array(new_intermediate_trace)
 
 plt.figure(figsize=(10, 6))
 plt.imshow(background_image)
 
-for i in range(len(limite_derecho[0])):
-    plt.scatter(limite_derecho[0][i], limite_derecho[1][i], c="yellow")
+for i in range(len(right_boundary[0])):
+    plt.scatter(right_boundary[0][i], right_boundary[1][i], c="yellow")
 
-for i in range(len(limite_izquierdo[0])):
-    plt.scatter(limite_izquierdo[0][i], limite_izquierdo[1][i], c="blue")
-    
-# Inicializar el punto rojo en la primera posición
-punto_rojo = plt.scatter(trazada_intermedia[0, 0], trazada_intermedia[0, 1], c="red")
-    
-plt.plot(trazada_intermedia[:, 0], trazada_intermedia[:, 1], 'g-', label='Trazada intermedia')
+for i in range(len(left_boundary[0])):
+    plt.scatter(left_boundary[0][i], left_boundary[1][i], c="blue")
 
-plt.title('Representación en 2D del Circuito de Nürburgring')
-plt.xlabel('Coordenada X')
-plt.ylabel('Coordenada Y')
+# Initialize the red point at the first position
+red_point = plt.scatter(intermediate_trace[0, 0], intermediate_trace[0, 1], c="red")
+
+plt.plot(intermediate_trace[:, 0], intermediate_trace[:, 1], 'g-', label='Intermediate Trace')
+
+plt.title('2D Representation of the Nürburgring Circuit')
+plt.xlabel('X Coordinate')
+plt.ylabel('Y Coordinate')
 plt.legend()
 
 plt.grid(True)
 
-# Actualizar la posición del punto rojo en un bucle
-for i in range(1, len(trazada_intermedia)):
-    x, y = trazada_intermedia[i]
-    punto_rojo.set_offsets([x, y])
-    plt.pause(0.01)  # Añadir un retraso de 0.01 segundos entre actualizaciones
+# Update the position of the red point in a loop
+for i in range(1, len(intermediate_trace)):
+    x, y = intermediate_trace[i]
+    red_point.set_offsets([x, y])
+    plt.pause(0.001)  # Add a 0.01-second delay between updates
 
 plt.show()
