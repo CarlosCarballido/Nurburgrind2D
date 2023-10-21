@@ -3,6 +3,40 @@ import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 import csv
 
+class cono_azul:
+    def __init__(self, x, y):
+        self.__x = x
+        self.__y = y
+        
+    def __str__(self):
+        return "Cono azul en la posición: ({}, {})".format(self.x, self.y)
+    
+    @property
+    def cono_azul(self):
+        return self.__cono_azul
+    
+    @cono_azul.setter
+    def cono_azul(self, x, y):
+        self.__x = x
+        self.__y = y
+        
+class cono_amarillo:
+    def __init__(self, x, y):
+        self.__x = x
+        self.__y = y
+        
+    def __str__(self):
+        return "Cono amarillo en la posición: ({}, {})".format(self.x, self.y)
+    
+    @property
+    def cono_amarillo(self):
+        return self.__cono_amarillo
+    
+    @cono_amarillo.setter
+    def cono_amarillo(self, x, y):
+        self.__x = x
+        self.__y = y
+
 x_izq = []
 y_izq = []
 x_der = []
