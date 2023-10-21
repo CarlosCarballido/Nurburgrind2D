@@ -52,8 +52,6 @@ with open(ruta_csv_nurbur, 'r') as csvfile:
         cono_amarillo_obj = cono_amarillo(float(row['X_der']), float(row['Y_der']))
         conos_amarillos.append(cono_amarillo_obj)
 
-
-l = np.array([[1,2,3,4], [5,6,7,8]])
 limite_izquierdo = np.array([[cono.x for cono in conos_azules], [cono.y for cono in conos_azules]])
 limite_derecho = np.array([[cono.x for cono in conos_amarillos], [cono.y for cono in conos_amarillos]])
 
