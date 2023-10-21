@@ -74,8 +74,6 @@ print(l[0][0])
 limite_izquierdo = np.array([[cono.x for cono in conos_azules], [cono.y for cono in conos_azules]])
 limite_derecho = np.array([[cono.x for cono in conos_amarillos], [cono.y for cono in conos_amarillos]])
 
-print(limite_izquierdo)
-print(limite_derecho)
 # Inicializa una lista para almacenar los puntos medios
 puntos_medios = []
 
