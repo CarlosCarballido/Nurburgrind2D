@@ -3,37 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 import csv
-
-class cono:
-    def __init__(self, x: float, y: float):
-        self.__x = x
-        self.__y = y
-        
-    @property
-    def x(self):
-        return self.__x
-
-    @property
-    def y(self):
-        return self.__y
-
-    @x.setter
-    def x(self, value):
-        self.__x = value
-
-    @y.setter
-    def y(self, value):
-        self.__y = value
-
-class cono_azul(cono):
-
-    def __str__(self):
-        return "Cono azul en la posición: ({}, {})".format(self.__x, self.__y)
-
-class cono_amarillo(cono):
-
-    def __str__(self):
-        return "Cono amarillo en la posición: ({}, {})".format(self.__x, self.__y)
+from cone.cone import cono_azul, cono_amarillo
 
 # Rutas a los archivos
 ruta_mapa_nurbur2D = 'utils/nurburgring_map_2D.jpg'
